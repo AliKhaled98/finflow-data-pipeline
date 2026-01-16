@@ -28,7 +28,7 @@ def fetch_api_data(from_currency, to_currency):
         return None
     
 
-exchange_data = fetch_api_data("EUR", "USD")
+exchange_data = fetch_api_data("USD", "EGP")
 
 # View the raw JSON dictionary
 # print(exchange_data)
@@ -56,8 +56,11 @@ storage_path = 'data/bronze/fx_rates'
 os.makedirs(storage_path, exist_ok=True)
 
 timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
-data1 = f"{storage_path}/fx_eur_usd_{timestamp}.parquet"
+data1 = f"{storage_path}/fx_usd_egp_{timestamp}.parquet"
 
 
 df.to_parquet(data1, index=False)
 print(f"Data successfully landed in Bronze: {data1}")
+
+
+print(df['exchange_rate'])
