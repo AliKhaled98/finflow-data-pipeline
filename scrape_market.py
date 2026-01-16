@@ -1,55 +1,47 @@
-import requests
-from bs4 import BeautifulSoup
-import os
+import yfinance as yf
 import pandas as pd
+import os
 
-def scrape_market_data():
-    URL = 'https://finance.yahoo.com/quote/EURUSD=X/'
-    headers = {"User-Agent": "Mozilla/5.0"}
-
-    response = requests.get(URL, headers=headers)
-
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-
-        return soup
-    else:
-        print('Access Denied')
-        return None
+def get_market_data():
+    # The ticker for USD to EGP on Yahoo Finance is "USDEGP=X"
+    ticker_symbol = "USDEGP=X"
     
-soup_obj = scrape_market_data()
-if soup_obj:
-    print('Successfully caught the soup!')
+    try:
+        # Fetch data using the yfinance Ticker object
+        ticker = yf.Ticker(ticker_symbol)
+        
+        # fast_info provides the most recent live data point
+        price = ticker.fast_info['last_price']
+        
+        if price:
+            return {
+                'from_currency': 'USD',
+                'to_currency': 'EGP',
+                'scraped_price': float(price),
+                'ingested_at': pd.Timestamp.now(),
+                'Source': 'yfinance_API'
+            }
+    except Exception as e:
+        print(f" Error fetching data: {e}")
+    return None
 
+# --- Process and Save ---
+market_data = get_market_data()
 
-def extract_exchange_rate(soup):
-    price_tag = soup.find(attrs={'data-testid': 'qsp-price'})
+if market_data:
+    df = pd.DataFrame([market_data])
 
-    if price_tag:
-        return price_tag.text
-    
-    return None 
-
-if soup_obj:
-    price = extract_exchange_rate(soup_obj)
-
-    if price:
-
-        data={
-            'from_currency': 'EUR',
-            'to_currency': 'USD',
-            'scraped_price': float(price.replace(',', '')),
-            'ingested_at': pd.Timestamp.now(),
-            'Source': 'YahooFinance_Scraper'
-        }
-
-    df = pd.DataFrame([data])
-
-    storage_path = 'data/bronze/market_scraped'
+    # Path safety for your D: drive project folder
+    storage_path = os.path.join('data', 'bronze', 'market_scraped')
     os.makedirs(storage_path, exist_ok=True)
 
     timestamp = pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')
-    scraped_data = f'{storage_path}/fx_market_{timestamp}.parquet'
+    filename = f'fx_market_{timestamp}.parquet'
+    save_path = os.path.join(storage_path, filename)
 
-    df.to_parquet(scraped_data, index=False)
-    print(f'Market data saved: {scraped_data}')
+    df.to_parquet(save_path, index=False)
+    
+    print(f" Success! USD/EGP Market Price: {market_data['scraped_price']}")
+    print(f" Saved to: {save_path}")
+else:
+    print(" Failed to retrieve market data.")
