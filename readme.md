@@ -28,6 +28,15 @@ I implemented a custom **Pipeline Orchestrator** (`run_pipeline.py`) using the P
 * **Fail-Fast Logic**: The pipeline utilizes `check=True` to halt execution immediately if any stage returns an error, preventing downstream data corruption.
 * **Performance Tracking**: Logs execution time for each stage to monitor pipeline efficiency.
 
+## 📊 Interactive Analytics Dashboard (Power BI)
+**Key Analytical Features:**
+* **Dynamic Risk Monitoring**: A specialized **Gauge visual** tracks real-time variance against the **0.1% Business Risk Threshold**.
+* **Automated Narrative**: Utilizes **Smart Narratives** to translate complex spread calculations into plain-English executive summaries (e.g., *"Current spread is 0.06%, which is 0.04% away from the risk limit"*).
+* **Operational Transparency**: Includes a **Data Freshness Tracker** (Last Sync Timestamp) that verifies when the Python orchestrator last pushed new data to the Gold layer.
+* **Volatility Distribution**: A histogram analyzing the frequency of **"High Volatility"** events to help stakeholders understand market stability trends over time.
+* **Dual-Axis Trend Analysis**: A custom time-series chart comparing **Official vs. Market rates** while overlaying the **Spread %** as a secondary axis for clear correlation.
+> **Note:** The dashboard is fully automated. When the Python orchestrator (`run_pipeline.py`) completes, the Power BI report is ready for a "One-Click" refresh to reflect the latest market conditions.
+
 ## 📊 How to Run
 ```bash
 # Clone the repository
